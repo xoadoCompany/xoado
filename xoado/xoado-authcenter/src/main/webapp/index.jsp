@@ -13,13 +13,13 @@
 		<input type="submit" value="获取手机验证码">
 	</form>
 	密码登录
-	<form action="access/login/account_Login" method="post">
+	<form action="access/login/account" method="post">
 		<input type="text" name="phoneNumber">
 		<input type="password" name="userPassword">
 		<input type="submit" value="登录">
 	</form>
 	验证码-有/登录
-		<form action="/xoado/access/login/VerificationCcode_login" method="post">
+		<form action="/xoado/access/login/VerificationCode" method="post">
 		<input type="text" value="点击获取验证码获取验证码" name="phoneNumber">
 		<input type="text" name="Verification_code">
 		<input type="submit" value="登录">
