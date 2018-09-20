@@ -1,0 +1,12 @@
+package com.xoado.FilingCabinet.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@RequestMapping("/{archiveid}")
+@Controller
+public class UGetAllTheInformation {
+
+	
+	
+}

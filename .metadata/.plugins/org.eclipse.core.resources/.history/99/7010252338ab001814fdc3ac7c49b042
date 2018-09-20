@@ -1,0 +1,36 @@
+package com.xoado.FilingCabinet.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.xoado.FilingCabinet.service.IArchives;
+import com.xoado.common.XoadoResult;
+
+
+@Controller
+@RequestMapping("/{archiveid}")
+public class UGetAllTheInformation {
+
+	@Autowired
+	private IArchives iArchives;
+	
+	/**
+	 * 6：返回指定资料的图片附件
+	 * @param archiveId
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value="/pictures",method=RequestMethod.GET)
+	@ResponseBody
+	public XoadoResult appointImage(@PathVariable("archiveid") String archiveid, HttpServletRequest request) {
+		XoadoResult result = iArchives.appointImage(archiveid, request);
+		return result;
+	}
+	
+}

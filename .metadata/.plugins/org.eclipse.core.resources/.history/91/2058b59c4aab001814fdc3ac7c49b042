@@ -1,0 +1,20 @@
+package com.xoado.tools.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.xoado.common.XoadoResult;
+
+@Controller
+@RequestMapping("/files")
+public class Files {
+	
+	
+	public XoadoResult uploadBase64(String base64text,HttpServletRequest request) throws Exception {
+		
+	}
+	
+
+}

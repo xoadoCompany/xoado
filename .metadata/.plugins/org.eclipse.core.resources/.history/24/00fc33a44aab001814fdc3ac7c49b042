@@ -1,0 +1,24 @@
+package com.xoado.tools.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.xoado.common.XoadoResult;
+import com.xoado.tools.service.IXDfileUpload;
+
+@Controller
+@RequestMapping("/files")
+public class Files {
+	
+	@Autowired
+	private IXDfileUpload ixDfileUpload;
+	
+	public XoadoResult uploadBase64(String base64text,HttpServletRequest request) throws Exception {
+		XoadoResult result = ixDfileUpload.uploadBase64(base64text, request);
+	}
+	
+
+}

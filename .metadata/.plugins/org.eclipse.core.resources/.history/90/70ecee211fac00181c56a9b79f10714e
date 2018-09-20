@@ -1,0 +1,17 @@
+package com.xoado.tools.service.impl;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.xoado.common.XoadoResult;
+import com.xoado.tools.service.IFileUpload;
+
+@Service
+public class FileUpload implements IFileUpload{
+	
+	@Override
+	public XoadoResult image_recognition(CommonsMultipartFile file, String base64Body) {
+		
+	}
+
+}
