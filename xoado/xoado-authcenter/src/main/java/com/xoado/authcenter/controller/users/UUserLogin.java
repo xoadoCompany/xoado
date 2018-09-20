@@ -49,7 +49,7 @@ public class UUserLogin {
 	 * @param response
 	 * @return 用户登录
 	 */
-	@RequestMapping(value="/account_Login",method=RequestMethod.POST)
+	@RequestMapping(value="/account",method=RequestMethod.POST)
 	@ResponseBody
 	public XoadoResult account_Login(String phoneNumber,String userPassword,HttpServletRequest request,HttpServletResponse response){	
 		XoadoResult result = iUserLogin.select(phoneNumber, userPassword, request, response);	
@@ -59,7 +59,7 @@ public class UUserLogin {
 	
 	
 //	手机验证码登录
-	@RequestMapping(value="VerificationCcode_login",method=RequestMethod.POST)
+	@RequestMapping(value="VerificationCode",method=RequestMethod.POST)
 	@ResponseBody
 	public XoadoResult phone_VerificationCcode_login(String phoneNumber,String Verification_code,HttpServletRequest request){
 		
