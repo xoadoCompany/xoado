@@ -17,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.xoado.authcenter.bean.AccountLogin;
 import com.xoado.authcenter.jedis.XoadoSession;
 import com.xoado.authcenter.service.Iuser.IUserLogin;
 import com.xoado.client.http.XoadoHttpRemote;
+import com.xoado.common.ParamCheack;
 import com.xoado.common.XoadoResult;
+import com.xoado.protocol.BaseRetCode;
 
 
 
@@ -48,11 +51,22 @@ public class UUserLogin {
 	 * @param request
 	 * @param response
 	 * @return 用户登录
+	 * @throws Exception 
 	 */
 	@RequestMapping(value="/account",method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult account_Login(String phoneNumber,String userPassword,HttpServletRequest request,HttpServletResponse response){	
-		XoadoResult result = iUserLogin.select(phoneNumber, userPassword, request, response);	
+	public XoadoResult account_Login(String phoneNumber,String userPassword,HttpServletRequest request,HttpServletResponse response) {
+		Map<Object,Object> map = new HashMap<>();
+		map.put("phoneNumber", phoneNumber);
+		map.put("userPassword", userPassword);
+		Map<Object,Object> mustMap = new HashMap<>();
+		mustMap.put("phoneNumber", "phoneNumber");
+		mustMap.put("userPassword", "userPassword");
+		AccountLogin accountLogin = new AccountLogin();
+		ParamCheack paramCheack = new ParamCheack();
+		accountLogin =  (AccountLogin) paramCheack.membercheack(map, accountLogin, mustMap);
+//		XoadoResult result = iUserLogin.select(phoneNumber, userPassword, request, response);
+		XoadoResult result = iUserLogin.select(accountLogin, request, response);
 		return result;
 		
 	}

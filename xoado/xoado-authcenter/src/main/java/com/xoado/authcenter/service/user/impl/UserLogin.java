@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.xoado.authcenter.bean.AccountLogin;
 import com.xoado.authcenter.bean.TblUser;
 import com.xoado.authcenter.bean.TblUserExample;
 import com.xoado.authcenter.bean.TblUserExample.Criteria;
@@ -56,12 +57,15 @@ public class UserLogin implements IUserLogin {
 
 	
 	@Override
-	public XoadoResult select(String phoneNumber, String userPassword, HttpServletRequest request,
+	public XoadoResult select(AccountLogin accountLogin, HttpServletRequest request,
 			HttpServletResponse response) {
-
+		
+		if(accountLogin == null){
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+		}
 		TblUserExample example = new TblUserExample();
 		Criteria criteria = example.createCriteria();
-		criteria.andPhoneNumberEqualTo(phoneNumber);
+		criteria.andPhoneNumberEqualTo(accountLogin.getphoneNumber());
 		List<TblUser> list = tblUserMapper.selectByExample(example);
 /*
  * 查询用户是否存在
@@ -74,7 +78,7 @@ public class UserLogin implements IUserLogin {
 		
 		TblUser user = list.get(0);
 		
-		if(!user.getUserPassword().equals(MD5.MD5Encode(userPassword))){
+		if(!user.getUserPassword().equals(MD5.MD5Encode(accountLogin.getuserPassword()))){
 				
 			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_PASSWORD_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_PASSWORD_ERROR.getRetMsg());
 			
