@@ -8,7 +8,7 @@
 </head>
 <body>
 获取短信验证码
-	<form action="access/login/sendsms" method="post">
+	<form action="/access/verificationcode" method="post">
 		<input type="text" name="phoneNumber">
 		<input type="submit" value="获取手机验证码">
 	</form>
@@ -25,13 +25,13 @@
 		<input type="submit" value="登录">
 	</form>
 	验证码-无/登录
-		<form action="xoado/access/login/VerificationCcode_login" method="post">
+		<form action="access/login/VerificationCode" method="post">
 		<input type="text" value="点击获取验证码获取验证码" name="phoneNumber">
-		<input type="text" name="Verification_code">
+		<input type="text" name="verification_code">
 		<input type="submit" value="登录">
 	</form>
 	注册
-		<form action="xoado/access/login/userRegister" method="post">
+		<form action="access/login/userRegister" method="post">
 		手机号：<input type="text" name="phoneNumber"><br>
 		验证码：<input type="text" name="Verification_code"><br>
 		密码：<input type="password" name="userPassword"><br>

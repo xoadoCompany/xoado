@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.xoado.authcenter.bean.AccountLogin;
+import com.xoado.authcenter.bean.PhoneVerificationCodeLogin;
+import com.xoado.authcenter.bean.Register;
 import com.xoado.authcenter.bean.TblUser;
 import com.xoado.authcenter.bean.TblUserExample;
 import com.xoado.authcenter.bean.TblUserExample.Criteria;
@@ -129,20 +131,24 @@ public class UserLogin implements IUserLogin {
 	}
 
 	@Override
-	public XoadoResult phone_VerificationCode_login(String phoneNumber, String Verification_code,
-			HttpServletRequest request) {
+	public XoadoResult phone_VerificationCode_login(PhoneVerificationCodeLogin phoneVerificationCodeLogin,
+			HttpServletRequest request,HttpServletResponse response) {
+		
+		if(phoneVerificationCodeLogin==null){
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+		}
 //		查询此手机号是否存在，如果不存在则提示用户注册
 		TblUserExample example = new TblUserExample();	
 		Criteria criteria = example.createCriteria();
-		criteria.andPhoneNumberEqualTo(phoneNumber);
+		criteria.andPhoneNumberEqualTo(phoneVerificationCodeLogin.getphoneNumber());
 		List<TblUser> list = tblUserMapper.selectByExample(example);
 		if(list.size()==0 || list==null){
-			return XoadoResult.build(400, "此用户不存在，请注册");	
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetCode()),BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetMsg());	
 		}
 
-		String phone_code = xoadoSession.get(phoneNumber);
+		String phone_code = xoadoSession.get(phoneVerificationCodeLogin.getphoneNumber());
 
-		boolean b = phone_code.equals(Verification_code);
+		boolean b = phone_code.equals(phoneVerificationCodeLogin.getverification_code());
 
 		if(phone_code==""){
 			
@@ -150,7 +156,7 @@ public class UserLogin implements IUserLogin {
 			
 		}else{
 			
-			if(Verification_code==null){
+			if(phoneVerificationCodeLogin.getverification_code()==null){
 				
 				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetCode()), BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetMsg());
 			
@@ -159,62 +165,104 @@ public class UserLogin implements IUserLogin {
 				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
 			}
 			
+			List<AccessIdentity> xoadolist = new ArrayList<AccessIdentity>();
 			
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg());
+			AccessIdentity identity = new AccessIdentity();
+			
+			for (TblUser tblUser : list) {
+				
+				identity.setDate(new Date().getTime());
+				
+				identity.setXOADOTOKENID(MD5.MD5Encode(UUID.randomUUID().toString()));
+				
+				identity.setUserId(tblUser.getUserid());
+				
+				identity.setUserName(tblUser.getName());
+				
+				identity.setUserType(OrganizationStauts.NORMAL.getDescribe());
+				
+				identity.setOpenId(null);
+				
+				xoadolist.add(identity);
+				
+			}
+			
+			String json = JsonUtils.objectToJson(xoadolist);
+			
+			Cookie cookie = new Cookie("XOADOTOKENID", identity.getXOADOTOKENID());
+			cookie.setPath("/");
+			cookie.setMaxAge(1000*60*5);
+			response.addCookie(cookie);
+		
+			request.getSession().setAttribute(identity.getXOADOTOKENID(), json);
+//			根据用户Id取到XOADOTOKENID
+//			xoadoSession.set(identity.getUserId(), identity.getXOADOTOKENID());
+
+			xoadoSession.set(identity.getXOADOTOKENID(), json);
+			
+			xoadoSession.expire(identity.getUserId(), 1800);
+			
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg(),identity.getXOADOTOKENID());
 		}
 		
 	}
 //	注册新用户
 	@Override
-	public XoadoResult user_register(String phoneNumber, String userPassword,String Verification_code, HttpServletRequest request
+	public XoadoResult user_register(Register register, HttpServletRequest request
 			) {
-		String str = "[0-9]{8,11}";
+		
+		if(register==null){
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+		}
+//		String str = "[0-9]{8,11}";
+		String str="^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\\d{8}$";
 		
 		Pattern pattern = Pattern.compile(str);
-		Matcher matcher = pattern.matcher(phoneNumber);
+		Matcher matcher = pattern.matcher(register.getphoneNumber());
 		boolean b = matcher.matches();
 
 		if(b==false){
-//			手机格式不正确，请求参数错误	、
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+//			手机格式不正确，请求参数错误	
+				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_ERROR_CHECK_MOBILE_CODE.getRetCode()), BaseRetCode.CODE_ERROR_CHECK_MOBILE_CODE.getRetMsg());
 		}
 //	查询用户是否存在
-		TblUserExample example = new TblUserExample();	
-		Criteria criteria = example.createCriteria();
-		criteria.andPhoneNumberEqualTo(phoneNumber);
-		List<TblUser> list = tblUserMapper.selectByExample(example);
-		if(list.size()==0 || list==null){
-			String phone_code = xoadoSession.get(phoneNumber);
-			boolean c= phone_code.equals(Verification_code);
-			if(c!=false){
-				TblUser tblUser = new TblUser();
-				tblUser.setPhoneNumber(phoneNumber);
-				String md5Encode = MD5.MD5Encode(userPassword);
-				tblUser.setUserPassword(md5Encode);
-				tblUser.setUserid(MD5.MD5Encode(UUID.randomUUID().toString())); 
-				tblUser.setUnionid(null);
-				tblUser.setName(null);
-				tblUser.setNickName(null);
-				tblUser.setHeadImgUrl(null);
-				tblUser.setRegisterTime(new Date());
-				tblUser.setAccountstatus("CONTROLLED");
-				tblUser.setAccounttype(null);
-				tblUser.setSex(null);
-				tblUser.setCity(null);
-				tblUser.setCountry(null);
-				tblUser.setProvince(null);
-				tblUser.setIdcard(null);
-				tblUser.setPositiveImgUrl(null);
-				tblUser.setReverseImgUrl(null);
-				tblUser.setMessage(null);
-				tblUser.setAuditTime(null);
-				tblUserMapper.insert(tblUser);	
+		else{
+			TblUserExample example = new TblUserExample();	
+			Criteria criteria = example.createCriteria();
+			criteria.andPhoneNumberEqualTo(register.getphoneNumber());
+			List<TblUser> list = tblUserMapper.selectByExample(example);
+			if(list.size()==0 || list==null){
+				String phone_code = xoadoSession.get(register.getphoneNumber());
+				boolean c= phone_code.equals(register.getVerification_code());
+				if(c!=false){
+					TblUser tblUser = new TblUser();
+					tblUser.setPhoneNumber(register.getphoneNumber());
+					String md5Encode = MD5.MD5Encode(register.getuserPassword());
+					tblUser.setUserPassword(md5Encode);
+					tblUser.setUserid(MD5.MD5Encode(UUID.randomUUID().toString())); 
+					tblUser.setUnionid(null);
+					tblUser.setName(null);
+					tblUser.setNickName(null);
+					tblUser.setHeadImgUrl(null);
+					tblUser.setRegisterTime(new Date());
+					tblUser.setAccountstatus("CONTROLLED");
+					tblUser.setAccounttype(null);
+					tblUser.setSex(null);
+					tblUser.setCity(null);
+					tblUser.setCountry(null);
+					tblUser.setProvince(null);
+					tblUser.setIdcard(null);
+					tblUser.setPositiveImgUrl(null);
+					tblUser.setReverseImgUrl(null);
+					tblUser.setMessage(null);
+					tblUser.setAuditTime(null);
+					tblUserMapper.insert(tblUser);
+					return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg());
+				}
+				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
 			}
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg());
 		}
 		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_EXIST.getRetCode()), BaseRetCode.CODE_FRAME_ACCOUNT_EXIST.getRetMsg());
-	
-		
 	}
 
 

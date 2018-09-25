@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.xoado.authcenter.bean.AccountLogin;
+import com.xoado.authcenter.bean.PhoneVerificationCodeLogin;
+import com.xoado.authcenter.bean.Register;
 import com.xoado.authcenter.jedis.XoadoSession;
 import com.xoado.authcenter.service.Iuser.IUserLogin;
 import com.xoado.client.http.XoadoHttpRemote;
@@ -75,9 +77,18 @@ public class UUserLogin {
 //	手机验证码登录
 	@RequestMapping(value="VerificationCode",method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult phone_VerificationCcode_login(String phoneNumber,String Verification_code,HttpServletRequest request){
-		
-		XoadoResult result = iUserLogin.phone_VerificationCode_login(phoneNumber, Verification_code, request);
+	public XoadoResult phone_VerificationCcode_login(String phoneNumber,String verification_code,HttpServletRequest request,HttpServletResponse response){
+		Map<Object,Object> map = new HashMap<>();
+		map.put("phoneNumber", phoneNumber);
+		map.put("verification_code", verification_code);
+		Map<Object,Object> mustMap = new HashMap<>();
+		mustMap.put("phoneNumber", "phoneNumber");
+		mustMap.put("verification_code", "verification_code");
+		PhoneVerificationCodeLogin phoneVerificationCodeLogin = new PhoneVerificationCodeLogin();
+		ParamCheack paramCheack = new ParamCheack();
+		phoneVerificationCodeLogin =(PhoneVerificationCodeLogin) paramCheack.membercheack(map, phoneVerificationCodeLogin, mustMap);
+		XoadoResult result = iUserLogin.phone_VerificationCode_login(phoneVerificationCodeLogin, request,response);
+//		XoadoResult result = iUserLogin.phone_VerificationCode_login(phoneNumber, verification_code, request,response);
 		
 		return result;	
 		
@@ -94,8 +105,19 @@ public class UUserLogin {
 	@RequestMapping(value="userRegister",method=RequestMethod.POST)
 	@ResponseBody
 	public XoadoResult Register(String phoneNumber,String userPassword,String Verification_code,HttpServletRequest request ){
-		
-		XoadoResult result = iUserLogin.user_register(phoneNumber, userPassword, Verification_code,request);
+		Map<Object,Object> map = new HashMap<>();
+		map.put("phoneNumber", phoneNumber);
+		map.put("userPassword", userPassword);
+		map.put("Verification_code", Verification_code);
+		Map<Object, Object> mustMap = new HashMap<>();
+		mustMap.put("phoneNumber", "phoneNumber");
+		mustMap.put("userPassword", "userPassword");
+		mustMap.put("Verification_code", "Verification_code");
+		Register register = new Register();
+		ParamCheack paramCheack = new ParamCheack();
+		register = (Register)paramCheack.membercheack(map, register, mustMap);
+		XoadoResult result = iUserLogin.user_register(register,request);
+//		XoadoResult result = iUserLogin.user_register(phoneNumber, userPassword, Verification_code,request);
 		return result;	
 	}
 	
