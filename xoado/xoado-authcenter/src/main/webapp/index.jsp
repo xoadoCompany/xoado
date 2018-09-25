@@ -27,7 +27,7 @@
 	验证码-无/登录
 		<form action="access/login/VerificationCode" method="post">
 		<input type="text" value="点击获取验证码获取验证码" name="phoneNumber">
-		<input type="text" name="verification_code">
+		<input type="text" name="Verification_code">
 		<input type="submit" value="登录">
 	</form>
 	注册

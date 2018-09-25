@@ -148,7 +148,7 @@ public class UserLogin implements IUserLogin {
 
 		String phone_code = xoadoSession.get(phoneVerificationCodeLogin.getphoneNumber());
 
-		boolean b = phone_code.equals(phoneVerificationCodeLogin.getverification_code());
+		boolean b = phone_code.equals(phoneVerificationCodeLogin.getVerification_code());
 
 		if(phone_code==""){
 			
@@ -156,7 +156,7 @@ public class UserLogin implements IUserLogin {
 			
 		}else{
 			
-			if(phoneVerificationCodeLogin.getverification_code()==null){
+			if(phoneVerificationCodeLogin.getVerification_code()==null){
 				
 				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetCode()), BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetMsg());
 			

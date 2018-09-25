@@ -77,13 +77,13 @@ public class UUserLogin {
 //	手机验证码登录
 	@RequestMapping(value="VerificationCode",method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult phone_VerificationCcode_login(String phoneNumber,String verification_code,HttpServletRequest request,HttpServletResponse response){
+	public XoadoResult phone_VerificationCcode_login(String phoneNumber,String Verification_code,HttpServletRequest request,HttpServletResponse response){
 		Map<Object,Object> map = new HashMap<>();
 		map.put("phoneNumber", phoneNumber);
-		map.put("verification_code", verification_code);
+		map.put("Verification_code", Verification_code);
 		Map<Object,Object> mustMap = new HashMap<>();
 		mustMap.put("phoneNumber", "phoneNumber");
-		mustMap.put("verification_code", "verification_code");
+		mustMap.put("Verification_code", "Verification_code");
 		PhoneVerificationCodeLogin phoneVerificationCodeLogin = new PhoneVerificationCodeLogin();
 		ParamCheack paramCheack = new ParamCheack();
 		phoneVerificationCodeLogin =(PhoneVerificationCodeLogin) paramCheack.membercheack(map, phoneVerificationCodeLogin, mustMap);

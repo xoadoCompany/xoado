@@ -2,7 +2,7 @@ package com.xoado.authcenter.bean;
 
 public class PhoneVerificationCodeLogin {
 	private String phoneNumber;
-	private String verification_code;
+	private String Verification_code;
 	/**
 	 * @return the phoneNumber
 	 */
@@ -18,14 +18,14 @@ public class PhoneVerificationCodeLogin {
 	/**
 	 * @return the verification_code
 	 */
-	public String getverification_code() {
-		return verification_code;
+	public String getVerification_code() {
+		return Verification_code;
 	}
 	/**
 	 * @param verification_code the verification_code to set
 	 */
-	public void setverification_code(String verification_code) {
-		this.verification_code = verification_code;
+	public void setVerification_code(String verification_code) {
+		this.Verification_code = verification_code;
 	}
 	
 	
