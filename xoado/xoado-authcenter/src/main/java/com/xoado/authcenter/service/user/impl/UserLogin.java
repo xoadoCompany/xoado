@@ -223,7 +223,7 @@ public class UserLogin implements IUserLogin {
 
 		if(b==false){
 //			手机格式不正确，请求参数错误	
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_ERROR_CHECK_MOBILE_CODE.getRetCode()), BaseRetCode.CODE_ERROR_CHECK_MOBILE_CODE.getRetMsg());
+				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
 //	查询用户是否存在
 		else{
