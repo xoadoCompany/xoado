@@ -8,7 +8,7 @@
 </head>
 <body>
 获取短信验证码
-	<form action="/access/verificationcode" method="post">
+	<form action="access/verificationcode" method="post">
 		<input type="text" name="phoneNumber">
 		<input type="submit" value="获取手机验证码">
 	</form>
