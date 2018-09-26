@@ -68,7 +68,7 @@ public class Organize implements IOrganizeService {
 			System.out.println(list);
 			if(!list.isEmpty()){
 //				资源已存在
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_RESOURCE_IMPLEMETHTATION_ERRED.getRetCode()), BaseRetCode.CODE_FRAME_RESOURCE_IMPLEMETHTATION_ERRED.getRetMsg());
+				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_RESOURCE_EXISTING.getRetCode()), BaseRetCode.CODE_FRAME_RESOURCE_EXISTING.getRetMsg());
 			}
 			TblOrganizeExample example2 = new TblOrganizeExample();
 			Criteria criteria2 = example2.createCriteria();
@@ -76,7 +76,7 @@ public class Organize implements IOrganizeService {
 			List<TblOrganize> list2 = organizeMapper.selectByExample(example2);
 			if(!list2.isEmpty()){
 //				资源已存在
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_RESOURCE_IMPLEMETHTATION_ERRED.getRetCode()), BaseRetCode.CODE_FRAME_RESOURCE_IMPLEMETHTATION_ERRED.getRetMsg());
+				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_RESOURCE_EXISTING.getRetCode()), BaseRetCode.CODE_FRAME_RESOURCE_EXISTING.getRetMsg());
 			}
 		TblOrganize organize = new TblOrganize();
 		organize.setOrganizeid(orgid);
@@ -107,7 +107,8 @@ public class Organize implements IOrganizeService {
 		List<String> list2 = iOrganizeMember.select(page, rows, request);
 //		新建一个list集合便于返回
 		if(list2==null){
-			return XoadoResult.build(400, "list为空");
+//			return XoadoResult.build(400, "list为空");
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg(),list2);
 		}
 		List<Object> list3 = new ArrayList<>();
 //		遍历list集合
@@ -127,7 +128,7 @@ public class Organize implements IOrganizeService {
 				list3.add(tblOrganize);
 			}
 		}
-		return XoadoResult.build(200, "展示全部",list3);
+		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg(),list3);
 	}
 //	all
 	@Override
@@ -145,7 +146,7 @@ public class Organize implements IOrganizeService {
 			xoado.setOrganizeName(tblOrganize.getOrganizeName());
 			xoado_list.add(xoado);
 		}
-		return XoadoResult.build(200, "返回值",xoado_list);
+		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg(),xoado_list);
 	}
  
 	@Override
@@ -181,7 +182,7 @@ public class Organize implements IOrganizeService {
 				organizeMapper.deleteByPrimaryKey(organizeId);
 			} catch (Exception e) {
 				// TODO: handle exception
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_ORGANIZET_EXISTS_MEMBER.getRetCode()), BaseRetCode.CODE_ORGANIZET_EXISTS_MEMBER.getRetMsg());
+				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_ERROR_BREAK_THE_LAW.getRetCode()), BaseRetCode.CODE_ERROR_BREAK_THE_LAW.getRetMsg());
 				
 			}
 			

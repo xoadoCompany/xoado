@@ -248,7 +248,7 @@ public class Dept implements IDept{
 		} catch (Exception e) {
 			// TODO: handle exception
 //			若userId已存在  则添加失败
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_RESOURCE_IMPLEMETHTATION_ERRED.getRetCode()), BaseRetCode.CODE_FRAME_RESOURCE_IMPLEMETHTATION_ERRED.getRetMsg());
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_RESOURCE_EXISTING.getRetCode()), BaseRetCode.CODE_FRAME_RESOURCE_EXISTING.getRetMsg());
 		}
 		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg());
 	}

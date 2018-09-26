@@ -85,11 +85,8 @@ public class Aplication implements IApplication {
 		information.setRedirectUri(null);
 		information.setAppDownloadUrl(null);
 		information.setCreatetime(new Date());
-		int insert = tblAppInformationMapper.insert(information);
-		if(insert!=1){
-			return XoadoResult.build(400, "添加失败");
-		}
-		return XoadoResult.ok();
+		tblAppInformationMapper.insert(information);
+		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg());
 	}
 
 	@Override

@@ -65,12 +65,11 @@ public class ApiInteface implements IApiInteface {
 			inteface.setParameter(null);
 			inteface.setRequestMethod(requestMethod);
 			inteface.setCreatetime(new Date());
-			apiIntefaceMapper.insert(inteface);
-			
+			apiIntefaceMapper.insert(inteface);	
 		}
 		
 		
-		return XoadoResult.ok();
+		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg());
 	}
 
 	@Override
@@ -88,7 +87,7 @@ public class ApiInteface implements IApiInteface {
 		tblApiInteface.setAuditstatus(tblApiInteface.getAuditstatus());
 		tblApiInteface.setCreatetime(tblApiInteface.getCreatetime());
 		apiIntefaceMapper.updateByPrimaryKey(tblApiInteface);
-		return XoadoResult.ok();
+		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg());
 	}
 
 	@Override
@@ -96,7 +95,7 @@ public class ApiInteface implements IApiInteface {
 		TblApiInteface tblApiInteface = apiIntefaceMapper.selectByPrimaryKey(apiId);
 		tblApiInteface.setApistatus(apistatus);
 		apiIntefaceMapper.updateByPrimaryKey(tblApiInteface);
-		return XoadoResult.ok();
+		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg());
 	}
 
 	@Override
@@ -172,7 +171,7 @@ public class ApiInteface implements IApiInteface {
 		package3.setAppId(appId);
 		package3.setDescription(description);
 		packageMapper.insert(package3);
-		return XoadoResult.ok();
+		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg());
 	}
 
 	@Override
