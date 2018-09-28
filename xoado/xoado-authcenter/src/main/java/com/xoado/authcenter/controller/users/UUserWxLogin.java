@@ -1,5 +1,6 @@
 package com.xoado.authcenter.controller.users;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,8 +24,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xoado.authcenter.bean.RegisterPhoneCode;
 import com.xoado.authcenter.bean.TblWeixinUser;
-import com.xoado.authcenter.jedis.XoadoSession;
+import com.xoado.authcenter.bean.WxRegisterPhone;
+import com.xoado.authcenter.jedis.RedisCache;
 import com.xoado.authcenter.service.Iuser.IUserWxLogin;
 import com.xoado.client.http.XoadoHttpRemote;
 import com.xoado.cloud.frame.authcenter.access.UserInfoUtil;
@@ -32,9 +35,12 @@ import com.xoado.common.AES;
 import com.xoado.common.HttpsUtil;
 import com.xoado.common.JsonUtils;
 import com.xoado.common.MD5;
+import com.xoado.common.ParamCheack;
 import com.xoado.common.XoadoResult;
 import com.xoado.protocol.AccessIdentity;
+import com.xoado.protocol.BaseRetCode;
 import com.xoado.protocol.OrganizationStauts;
+import com.xoado.protocol.XoadoException;
 
 
 
@@ -43,7 +49,7 @@ import com.xoado.protocol.OrganizationStauts;
 public class UUserWxLogin {
 	
 	@Autowired
-	private XoadoSession xoadosession;
+	private RedisCache redisCache;
 	@Autowired
 	private IUserWxLogin wxlogin;
 	
@@ -105,9 +111,9 @@ public class UUserWxLogin {
 				
 				System.out.println("微信表没有该用户:"+json);
 				
-				xoadosession.set(XOADOTOKENID,json);
+				redisCache.set(XOADOTOKENID,json);
 				
-				xoadosession.expire(XOADOTOKENID, 1800);
+				redisCache.expire(XOADOTOKENID, 1800);
 				
 				map.put("XOADOTOKENID", XOADOTOKENID);
 				
@@ -131,9 +137,9 @@ public class UUserWxLogin {
 			
 			String json = JsonUtils.objectToJson(xoadolist);
 			
-			xoadosession.set(XOADOTOKENID,json);
+			redisCache.set(XOADOTOKENID,json);
 			
-			xoadosession.expire(XOADOTOKENID, 1800);
+			redisCache.expire(XOADOTOKENID, 1800);
 			
 			map.put("XOADOTOKENID", XOADOTOKENID);
 			map.put("openid", openId);
@@ -231,9 +237,9 @@ public class UUserWxLogin {
 									
 									System.out.println("微信表没有该用户:"+json);
 									
-									xoadosession.set(XOADOTOKENID,json);
+									redisCache.set(XOADOTOKENID,json);
 									
-									xoadosession.expire(XOADOTOKENID, 1800);
+									redisCache.expire(XOADOTOKENID, 1800);
 							
 							 return map; 
 						 }else {
@@ -258,9 +264,9 @@ public class UUserWxLogin {
 									
 									System.out.println("微信表有该用户:"+json);
 									
-									xoadosession.set(XOADOTOKENID,json);
+									redisCache.set(XOADOTOKENID,json);
 									
-									xoadosession.expire(XOADOTOKENID, 1800);
+									redisCache.expire(XOADOTOKENID, 1800);
 									
 								}
 	
@@ -298,11 +304,33 @@ public class UUserWxLogin {
 	 * @param Verification_code
 	 * @param request
 	 * @return
+	 * @throws IOException 
 	 */
 	@RequestMapping(value="/bindingphone",method=RequestMethod.PUT)
 	@ResponseBody
-	public XoadoResult Wx_register_phone(String openId,String phoneNumber,String Verification_code,HttpServletRequest request){
-		XoadoResult result = wxlogin.Wx_register_phone(openId, phoneNumber, Verification_code, request);
+	public XoadoResult Wx_register_phone(String openId,String phoneNumber,String Verification_code,HttpServletRequest request, HttpServletResponse response) throws IOException{
+		Map<Object,Object> map = new HashMap<>();
+		map.put("openId", openId);
+		map.put("phoneNumer",phoneNumber);
+		map.put("Verification_code",Verification_code);
+		Map<Object,Object> mustMap = new HashMap<>();
+		mustMap.put("openId", "openId");
+		mustMap.put("phoneNumber", "phoneNumber");
+		mustMap.put("Verification_code", "Verification_code");
+		WxRegisterPhone wxRegisterPhone = new WxRegisterPhone();
+		ParamCheack paramCheack = new ParamCheack();
+		wxRegisterPhone = (WxRegisterPhone)paramCheack.membercheack(map, wxRegisterPhone, mustMap);
+		XoadoResult result=null;
+		try {
+			result = wxlogin.Wx_register_phone(wxRegisterPhone, request,response);
+		} catch (XoadoException e) {
+			// TODO Auto-generated catch block
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("status", e.getCode());
+			jsonObject.put("msg", e.getMessage());
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter().write(jsonObject.toString());
+		}
 		return result;
 	}
 	/**
@@ -315,19 +343,28 @@ public class UUserWxLogin {
 	@RequestMapping(value="/verificationcode",method=RequestMethod.POST)
 	@ResponseBody
 	public XoadoResult register_phone_code(String phoneNumber, HttpServletRequest request){
-		
+		Map<Object,Object> map = new HashMap<>();
+		map.put("phoneNumber", phoneNumber);
+		Map<Object,Object> mustMap = new HashMap<>();
+		mustMap.put("phoneNumber","phoneNumber");
+		RegisterPhoneCode registerPhoneCode = new RegisterPhoneCode();
+		ParamCheack paramCheack = new ParamCheack();
+		registerPhoneCode =(RegisterPhoneCode) paramCheack.membercheack(map, registerPhoneCode, mustMap);
+		if(registerPhoneCode==null){
+			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+		}
 //	生成验证码		
 		int nextInt = new Random().nextInt(999999);
 //		System.out.println("验证码:"+nextInt);
 		request.getSession().setAttribute(phoneNumber, nextInt);
 //	存验证码	
 		
-		xoadosession.set(phoneNumber, nextInt+"");
-		xoadosession.expire(phoneNumber, 1000*60*5);
+		redisCache.set(phoneNumber, nextInt+"");
+		redisCache.expire(phoneNumber, 1000*60*5);
 //		获取应用之间互访的code
 //		appid = "123456789"   短信应用的的apppid
 //		String appid = "000003";
-//		String code = xoadosession.get(appid);
+//		String code = redisCache.get(appid);
 		String text = "小多验证码";
 		String code = "123";
 		String url = MESSAGETEST+"?text="+text+"&xoado_message="+nextInt+"&phoneNumber="+phoneNumber+"&code="+code;
@@ -349,11 +386,11 @@ public class UUserWxLogin {
 	public String getxoadoCode(String XDappid){
 			String code = null;
 			code = MD5.MD5Encode( UUID.randomUUID().toString());		
-//			code = xoadosession.get(XDappid);
+//			code = redisCache.get(XDappid);
 //			if(code==null){
 //			    code = MD5.MD5Encode( UUID.randomUUID().toString());
-//				xoadosession.set(XDappid, code);
-//				xoadosession.expire(XDappid, 600*5);
+//				redisCache.set(XDappid, code);
+//				redisCache.expire(XDappid, 600*5);
 //			}
 		
 		return code;

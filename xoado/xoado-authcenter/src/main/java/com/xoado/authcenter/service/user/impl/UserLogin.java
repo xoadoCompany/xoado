@@ -23,7 +23,7 @@ import com.xoado.authcenter.bean.Register;
 import com.xoado.authcenter.bean.TblUser;
 import com.xoado.authcenter.bean.TblUserExample;
 import com.xoado.authcenter.bean.TblUserExample.Criteria;
-import com.xoado.authcenter.jedis.XoadoSession;
+import com.xoado.authcenter.jedis.RedisCache;
 import com.xoado.authcenter.mapper.TblUserMapper;
 import com.xoado.authcenter.service.Iuser.IUserLogin;
 
@@ -38,6 +38,7 @@ import com.xoado.protocol.AccessIdentity;
 import com.xoado.protocol.BaseRetCode;
 
 import com.xoado.protocol.OrganizationStauts;
+import com.xoado.protocol.XoadoException;
 
 
 
@@ -50,7 +51,7 @@ public class UserLogin implements IUserLogin {
 	private TblUserMapper tblUserMapper;
 	
 	@Autowired
-	private XoadoSession xoadoSession;
+	private RedisCache redisCache;
 	
 	
 	
@@ -60,10 +61,10 @@ public class UserLogin implements IUserLogin {
 	
 	@Override
 	public XoadoResult select(AccountLogin accountLogin, HttpServletRequest request,
-			HttpServletResponse response) {
+			HttpServletResponse response) throws XoadoException {
 		
 		if(accountLogin == null){
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
 		TblUserExample example = new TblUserExample();
 		Criteria criteria = example.createCriteria();
@@ -74,7 +75,7 @@ public class UserLogin implements IUserLogin {
  */
 		if(list==null||list.size()==0){
 			
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetCode()), BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetMsg());
+			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetCode()), BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetMsg());
 		
 		}
 		
@@ -82,7 +83,7 @@ public class UserLogin implements IUserLogin {
 		
 		if(!user.getUserPassword().equals(MD5.MD5Encode(accountLogin.getuserPassword()))){
 				
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_PASSWORD_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_PASSWORD_ERROR.getRetMsg());
+			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_PASSWORD_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_PASSWORD_ERROR.getRetMsg());
 			
 		}
 			
@@ -120,11 +121,11 @@ public class UserLogin implements IUserLogin {
 	
 		request.getSession().setAttribute(identity.getXOADOTOKENID(), json);
 //		根据用户Id取到XOADOTOKENID
-//		xoadoSession.set(identity.getUserId(), identity.getXOADOTOKENID());
+//		redisCache.set(identity.getUserId(), identity.getXOADOTOKENID());
 
-		xoadoSession.set(identity.getXOADOTOKENID(), json);
+		redisCache.set(identity.getXOADOTOKENID(), json);
 		
-		xoadoSession.expire(identity.getUserId(), 1800);
+		redisCache.expire(identity.getUserId(), 1800);
 		
 		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg(),identity.getXOADOTOKENID());
 		
@@ -132,10 +133,10 @@ public class UserLogin implements IUserLogin {
 
 	@Override
 	public XoadoResult phone_VerificationCode_login(PhoneVerificationCodeLogin phoneVerificationCodeLogin,
-			HttpServletRequest request,HttpServletResponse response) {
+			HttpServletRequest request,HttpServletResponse response) throws XoadoException {
 		
 		if(phoneVerificationCodeLogin==null){
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
 //		查询此手机号是否存在，如果不存在则提示用户注册
 		TblUserExample example = new TblUserExample();	
@@ -143,26 +144,26 @@ public class UserLogin implements IUserLogin {
 		criteria.andPhoneNumberEqualTo(phoneVerificationCodeLogin.getphoneNumber());
 		List<TblUser> list = tblUserMapper.selectByExample(example);
 		if(list.size()==0 || list==null){
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetCode()),BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetMsg());	
+			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetCode()),BaseRetCode.CODE_FRAME_ACCOUNT_NOT_EXIST.getRetMsg());	
 		}
 
-		String phone_code = xoadoSession.get(phoneVerificationCodeLogin.getphoneNumber());
+		String phone_code = redisCache.get(phoneVerificationCodeLogin.getphoneNumber());
 
 		boolean b = phone_code.equals(phoneVerificationCodeLogin.getVerification_code());
 
 		if(phone_code==""){
 			
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
+		throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
 			
 		}else{
 			
 			if(phoneVerificationCodeLogin.getVerification_code()==null){
 				
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetCode()), BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetMsg());
+				throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetCode()), BaseRetCode.CODE_ERROR_CHECKCODE_EXPIRE.getRetMsg());
 			
 			}if(b==false){
 				
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
+				throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
 			}
 			
 			List<AccessIdentity> xoadolist = new ArrayList<AccessIdentity>();
@@ -196,11 +197,11 @@ public class UserLogin implements IUserLogin {
 		
 			request.getSession().setAttribute(identity.getXOADOTOKENID(), json);
 //			根据用户Id取到XOADOTOKENID
-//			xoadoSession.set(identity.getUserId(), identity.getXOADOTOKENID());
+//			redisCache.set(identity.getUserId(), identity.getXOADOTOKENID());
 
-			xoadoSession.set(identity.getXOADOTOKENID(), json);
+			redisCache.set(identity.getXOADOTOKENID(), json);
 			
-			xoadoSession.expire(identity.getUserId(), 1800);
+			redisCache.expire(identity.getUserId(), 1800);
 			
 			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()),BaseRetCode.CODE_SUCCESS.getRetMsg(),identity.getXOADOTOKENID());
 		}
@@ -208,11 +209,10 @@ public class UserLogin implements IUserLogin {
 	}
 //	注册新用户
 	@Override
-	public XoadoResult user_register(Register register, HttpServletRequest request
-			) {
+	public XoadoResult user_register(Register register, HttpServletRequest request, HttpServletResponse response) throws XoadoException {
 		
 		if(register==null){
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
 //		String str = "[0-9]{8,11}";
 		String str="^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\\d{8}$";
@@ -223,7 +223,7 @@ public class UserLogin implements IUserLogin {
 
 		if(b==false){
 //			手机格式不正确，请求参数错误	
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+				throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
 //	查询用户是否存在
 		else{
@@ -232,7 +232,7 @@ public class UserLogin implements IUserLogin {
 			criteria.andPhoneNumberEqualTo(register.getphoneNumber());
 			List<TblUser> list = tblUserMapper.selectByExample(example);
 			if(list.size()==0 || list==null){
-				String phone_code = xoadoSession.get(register.getphoneNumber());
+				String phone_code = redisCache.get(register.getphoneNumber());
 				boolean c= phone_code.equals(register.getVerification_code());
 				if(c!=false){
 					TblUser tblUser = new TblUser();
@@ -259,10 +259,10 @@ public class UserLogin implements IUserLogin {
 					tblUserMapper.insert(tblUser);
 					return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg());
 				}
-				return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
+				throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetCode()), BaseRetCode.CODE_FRAME_VERIFICATION_CODE_ERROR.getRetMsg());
 			}
 		}
-		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_EXIST.getRetCode()), BaseRetCode.CODE_FRAME_ACCOUNT_EXIST.getRetMsg());
+		throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_ACCOUNT_EXIST.getRetCode()), BaseRetCode.CODE_FRAME_ACCOUNT_EXIST.getRetMsg());
 	}
 
 

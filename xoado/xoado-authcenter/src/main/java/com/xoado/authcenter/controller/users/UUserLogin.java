@@ -1,5 +1,6 @@
 package com.xoado.authcenter.controller.users;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import java.util.Map;
@@ -20,12 +21,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.xoado.authcenter.bean.AccountLogin;
 import com.xoado.authcenter.bean.PhoneVerificationCodeLogin;
 import com.xoado.authcenter.bean.Register;
-import com.xoado.authcenter.jedis.XoadoSession;
+import com.xoado.authcenter.jedis.RedisCache;
 import com.xoado.authcenter.service.Iuser.IUserLogin;
 import com.xoado.client.http.XoadoHttpRemote;
 import com.xoado.common.ParamCheack;
 import com.xoado.common.XoadoResult;
 import com.xoado.protocol.BaseRetCode;
+import com.xoado.protocol.XoadoException;
+
+import net.sf.json.JSONObject;
 
 
 
@@ -39,7 +43,7 @@ import com.xoado.protocol.BaseRetCode;
 public class UUserLogin {
 	
 	@Autowired
-	private XoadoSession xoadosession;
+	private RedisCache redisCache;
 	@Autowired
 	private IUserLogin iUserLogin;
 	
@@ -53,11 +57,12 @@ public class UUserLogin {
 	 * @param request
 	 * @param response
 	 * @return 用户登录
+	 * @throws IOException 
 	 * @throws Exception 
 	 */
 	@RequestMapping(value="/account",method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult account_Login(String phoneNumber,String userPassword,HttpServletRequest request,HttpServletResponse response) {
+	public XoadoResult account_Login(String phoneNumber,String userPassword,HttpServletRequest request,HttpServletResponse response) throws IOException {
 		Map<Object,Object> map = new HashMap<>();
 		map.put("phoneNumber", phoneNumber);
 		map.put("userPassword", userPassword);
@@ -66,9 +71,18 @@ public class UUserLogin {
 		mustMap.put("userPassword", "userPassword");
 		AccountLogin accountLogin = new AccountLogin();
 		ParamCheack paramCheack = new ParamCheack();
-		accountLogin =  (AccountLogin) paramCheack.membercheack(map, accountLogin, mustMap);
-//		XoadoResult result = iUserLogin.select(phoneNumber, userPassword, request, response);
-		XoadoResult result = iUserLogin.select(accountLogin, request, response);
+		accountLogin =  (AccountLogin) paramCheack.membercheack(map, accountLogin, mustMap);		
+		XoadoResult result=null;
+		try {
+			result = iUserLogin.select(accountLogin, request, response);
+		} catch (XoadoException e) {
+			// TODO Auto-generated catch block
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("status", e.getCode());
+			jsonObject.put("msg", e.getMessage());
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter().write(jsonObject.toString());
+		}
 		return result;
 		
 	}
@@ -77,7 +91,7 @@ public class UUserLogin {
 //	手机验证码登录
 	@RequestMapping(value="VerificationCode",method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult phone_VerificationCcode_login(String phoneNumber,String Verification_code,HttpServletRequest request,HttpServletResponse response){
+	public XoadoResult phone_VerificationCcode_login(String phoneNumber,String Verification_code,HttpServletRequest request,HttpServletResponse response) throws IOException{
 		Map<Object,Object> map = new HashMap<>();
 		map.put("phoneNumber", phoneNumber);
 		map.put("Verification_code", Verification_code);
@@ -87,9 +101,17 @@ public class UUserLogin {
 		PhoneVerificationCodeLogin phoneVerificationCodeLogin = new PhoneVerificationCodeLogin();
 		ParamCheack paramCheack = new ParamCheack();
 		phoneVerificationCodeLogin =(PhoneVerificationCodeLogin) paramCheack.membercheack(map, phoneVerificationCodeLogin, mustMap);
-		XoadoResult result = iUserLogin.phone_VerificationCode_login(phoneVerificationCodeLogin, request,response);
-//		XoadoResult result = iUserLogin.phone_VerificationCode_login(phoneNumber, verification_code, request,response);
-		
+		XoadoResult result=null;
+		try {
+			result = iUserLogin.phone_VerificationCode_login(phoneVerificationCodeLogin, request,response);
+		} catch (XoadoException e) {
+			// TODO Auto-generated catch block
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("status", e.getCode());
+			jsonObject.put("msg", e.getMessage());
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter().write(jsonObject.toString());
+		}
 		return result;	
 		
 	}
@@ -101,10 +123,11 @@ public class UUserLogin {
 	 * @param Verification_code
 	 * @param request
 	 * @return 注册新用户
+	 * @throws IOException 
 	 */
 	@RequestMapping(value="userRegister",method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult Register(String phoneNumber,String userPassword,String Verification_code,HttpServletRequest request ){
+	public XoadoResult Register(String phoneNumber,String userPassword,String Verification_code,HttpServletRequest request,HttpServletResponse response) throws IOException{
 		Map<Object,Object> map = new HashMap<>();
 		map.put("phoneNumber", phoneNumber);
 		map.put("userPassword", userPassword);
@@ -116,8 +139,17 @@ public class UUserLogin {
 		Register register = new Register();
 		ParamCheack paramCheack = new ParamCheack();
 		register = (Register)paramCheack.membercheack(map, register, mustMap);
-		XoadoResult result = iUserLogin.user_register(register,request);
-//		XoadoResult result = iUserLogin.user_register(phoneNumber, userPassword, Verification_code,request);
+		XoadoResult result=null;
+		try {
+			result = iUserLogin.user_register(register,request,response);
+		} catch (XoadoException e) {
+			// TODO Auto-generated catch block
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("status", e.getCode());
+			jsonObject.put("msg", e.getMessage());
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter().write(jsonObject.toString());
+		}
 		return result;	
 	}
 	
@@ -148,8 +180,8 @@ public class UUserLogin {
 		System.out.println("code:"+code);
 		try {
 			
-			xoadosession.set(appid, code);
-			String a = xoadosession.get(appid);
+			redisCache.set(appid, code);
+			String a = redisCache.get(appid);
 			
 			System.out.println(a);
 			return false;
@@ -165,7 +197,7 @@ public class UUserLogin {
 	@RequestMapping(value="getcode",method=RequestMethod.POST)
 	public String getcode(String appid){
 
-		String code = xoadosession.get(appid);
+		String code = redisCache.get(appid);
 		
 		return code;
 		

@@ -2,12 +2,12 @@ package com.xoado.authcenter.jedis.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.xoado.authcenter.jedis.XoadoSession;
+import com.xoado.authcenter.jedis.RedisCache;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-public class JedisPoolClent  implements XoadoSession{
+public class JedisPoolClent  implements RedisCache{
 	@Autowired
 	private JedisPool jedisPool;
 

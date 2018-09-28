@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.xoado.authcenter.jedis.XoadoSession;
+import com.xoado.authcenter.jedis.RedisCache;
 
 @SuppressWarnings("unused")
 @Controller
@@ -19,19 +19,19 @@ public class Appsession {
 
 	
 	@Autowired
-	private XoadoSession xoadosession;
+	private RedisCache redisCache;
 	
 	@RequestMapping(value="setcode",method=RequestMethod.POST)
 	@ResponseBody
 	public boolean test(String code,String appid){
 		
 		try {
-		xoadosession.set(appid, code);
-		xoadosession.expire(appid, 1000*10*20);
-		xoadosession.hset("code", appid, code);
+		redisCache.set(appid, code);
+		redisCache.expire(appid, 1000*10*20);
+		redisCache.hset("code", appid, code);
 		System.out.println(appid+":"+code);
 		
-		String a = xoadosession.get(appid);
+		String a = redisCache.get(appid);
 //		System.out.println(a);
 		} catch (Exception e) {
 //			链接重置   Connection reset
@@ -44,7 +44,7 @@ public class Appsession {
 	@ResponseBody
 	public String getcode(String appid){
 		
-		String code = xoadosession.get(appid);
+		String code = redisCache.get(appid);
 		
 		return code;
 		
@@ -54,7 +54,7 @@ public class Appsession {
 	@ResponseBody
 	public String gettoken(String XOADOTOKENID){
 		System.out.println("tokenid="+XOADOTOKENID);
-		String token = xoadosession.get(XOADOTOKENID);
+		String token = redisCache.get(XOADOTOKENID);
 		System.out.println("认证中心获取到的token是："+token);
 		return token;
 		
