@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import com.github.pagehelper.PageInfo;
 import com.xoado.client.http.Paging;
 import com.xoado.common.MD5;
 import com.xoado.common.XoadoResult;
+import com.xoado.organize.bean.ApiIdUpdate;
+import com.xoado.organize.bean.ApiIntefaceAdd;
+import com.xoado.organize.bean.SeleApiInteface;
 import com.xoado.organize.bean.TblApiInteface;
 import com.xoado.organize.bean.TblApiIntefaceExample;
 import com.xoado.organize.bean.TblAppInformation;
@@ -28,6 +32,7 @@ import com.xoado.organize.mapper.TblAppPackageMapper;
 import com.xoado.organize.pojo.ApiPath;
 import com.xoado.organize.service.IApiInteface;
 import com.xoado.protocol.BaseRetCode;
+import com.xoado.protocol.XoadoException;
 
 /**
 * @author 作者
@@ -45,9 +50,10 @@ public class ApiInteface implements IApiInteface {
 	private TblAppPackageMapper packageMapper;
 
 	@Override
-	public XoadoResult apiinteface_add(String appId, String apiPath, Long requestMethod, String header,
-			String description, String parameter) {
-		
+	public XoadoResult apiinteface_add(String appId, String apiPath, Long requestMethod, String header,String description, String parameter, String apistatus, String auditstatus,HttpServletResponse response) throws XoadoException {
+//		if(apiIntefaceAdd==null){
+//			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+//		}
 		TblApiInteface inteface = new TblApiInteface();
 		inteface.setApiId(MD5.MD5Encode(UUID.randomUUID().toString()));
 		inteface.setApiPath(apiPath);
@@ -73,9 +79,10 @@ public class ApiInteface implements IApiInteface {
 	}
 
 	@Override
-	public XoadoResult apiid_update(String apiId, String apiPath, Long requestMethod, String header, String description,
-			String parameter) {
-		
+	public XoadoResult apiid_update(String apiId, String apiPath, Long requestMethod, String header, String description,String parameter,HttpServletResponse response) throws XoadoException {
+//		if(apiIdUpdate==null){
+//			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+//		}
 		TblApiInteface tblApiInteface = apiIntefaceMapper.selectByPrimaryKey(apiId);
 		tblApiInteface.setApiId(apiId);
 		tblApiInteface.setApiPath(apiPath);
@@ -99,9 +106,12 @@ public class ApiInteface implements IApiInteface {
 	}
 
 	@Override
-	public XoadoResult sele_apiInteface(int page, int rows, HttpServletRequest request) {
+	public XoadoResult sele_apiInteface(Integer page,Integer rows, HttpServletRequest request,HttpServletResponse response) throws XoadoException {
+//		if(seleApiInteface==null){
+//			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
+//		}
 		TblApiIntefaceExample example = new TblApiIntefaceExample();
-		PageHelper.startPage(page, rows);
+		PageHelper.startPage(page,rows);
 		List<TblApiInteface> list = apiIntefaceMapper.selectByExample(example);
 		Paging resule = new  Paging();
 		resule.setRows(list);

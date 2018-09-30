@@ -40,6 +40,7 @@ public class ParamCheack {
 				Class cla = classs.getClass();
 				Field f = cla.getDeclaredField(name);  //获取指定名称的属性
 				f.setAccessible(true);
+				System.out.println("---------------------"+name);
 				String value = (String) map.get(name);
 				String mustValue = (String) mustMap.get(name);
 				if (name.equals(mustValue)) {
@@ -60,6 +61,8 @@ public class ParamCheack {
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
+			System.out.println("----------------------------aaaaa");
+			e.printStackTrace();
 			return null;
 		}
 

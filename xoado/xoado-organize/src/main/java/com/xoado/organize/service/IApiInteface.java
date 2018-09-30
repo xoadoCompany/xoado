@@ -6,18 +6,26 @@ package com.xoado.organize.service;
 */
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.xoado.common.XoadoResult;
+import com.xoado.organize.bean.ApiIdUpdate;
+import com.xoado.organize.bean.ApiIntefaceAdd;
+import com.xoado.organize.bean.SeleApiInteface;
+import com.xoado.protocol.XoadoException;
 
 public interface IApiInteface {
 	
-	XoadoResult sele_apiInteface(int page,int rows,HttpServletRequest request);
+//	XoadoResult sele_apiInteface(SeleApiInteface seleApiInteface,HttpServletRequest request, HttpServletResponse response) throws XoadoException;
+	XoadoResult sele_apiInteface(Integer page,Integer rows,HttpServletRequest request ,HttpServletResponse response) throws XoadoException;
 	
 	XoadoResult sele_id_apiInteface(String apiId,HttpServletRequest request);
 	
-	XoadoResult apiinteface_add(String appId,String apiPath,Long requestMethod,String header,String description,String parameter);
+//	XoadoResult apiinteface_add(ApiIntefaceAdd apiIntefaceAdd,HttpServletResponse response) throws XoadoException;
+	XoadoResult apiinteface_add(String appId, String apiPath, Long requestMethod, String header,String description, String parameter, String apistatus, String auditstatus,HttpServletResponse response) throws XoadoException;
 	
-	XoadoResult apiid_update(String apiId,String apiPath,Long requestMethod,String header,String description,String parameter);
+//	XoadoResult apiid_update(String apiId,ApiIdUpdate apiIdUpdate,HttpServletResponse response) throws XoadoException;
+	XoadoResult apiid_update(String apiId, String apiPath, Long requestMethod, String header, String description,String parameter,HttpServletResponse response) throws XoadoException;
 	
 	XoadoResult apiid_update_status(String apiId,String apistatus,HttpServletRequest request);
 	

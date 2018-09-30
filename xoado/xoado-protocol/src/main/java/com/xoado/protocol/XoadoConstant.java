@@ -11,10 +11,11 @@ public class XoadoConstant {
 	
 	public static final String PROPERTIES = "resource/XoadoUrl.properties";
 
+	public static final String XOADOAUTHCETERDOMAIN = "xoadoauthceterdomain";
 
-
-
+	public static final String APPCACHE = "AppCache";
 	
+	public static final String PERMISSIONVALUE = "PermissionValue";
 	
 	
 

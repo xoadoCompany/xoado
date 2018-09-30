@@ -1,9 +1,12 @@
 package com.xoado.organize.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,9 +17,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.xoado.common.MD5;
+import com.xoado.common.ParamCheack;
 import com.xoado.common.XoadoResult;
+import com.xoado.organize.bean.ApiIdUpdate;
+import com.xoado.organize.bean.ApiIntefaceAdd;
+import com.xoado.organize.bean.SeleApiInteface;
 import com.xoado.organize.service.IApiInteface;
 import com.xoado.protocol.Apistatus;
+import com.xoado.protocol.XoadoException;
+
+import net.sf.json.JSONObject;
 
 
 /**
@@ -33,10 +43,31 @@ public class UApiInteface {
 //	b)	[get] /apis		获得接口列表
 	@RequestMapping(value="",method=RequestMethod.GET)
 	@ResponseBody
-	public XoadoResult sele_apiInteface(@RequestParam ("page") int page,
-			@RequestParam ("rows") int rows,HttpServletRequest request){
-			XoadoResult result = apiInteface.sele_apiInteface(page,rows,request);
-			return result;
+	public XoadoResult sele_apiInteface(@RequestParam ("page") Integer page,@RequestParam ("rows") Integer rows,HttpServletRequest request,HttpServletResponse response) throws IOException{
+//		Map<Object,Object> map = new HashMap<>();
+//		map.put("page", page);
+//		map.put("rows", rows);
+//		Map<Object,Object> mustMap = new HashMap<>();
+//		mustMap.put("page", "page");
+//		mustMap.put("rows", "rows");
+//		SeleApiInteface seleApiInteface = new SeleApiInteface();
+//		System.out.println("page------"+page);
+//		System.out.println("rows------"+rows);
+//		ParamCheack paramCheack = new ParamCheack();
+//		seleApiInteface =(SeleApiInteface) paramCheack.membercheack(map, seleApiInteface, mustMap);
+		XoadoResult result=null;
+		try{
+				result = apiInteface.sele_apiInteface(page,rows,request,response);
+			} catch (XoadoException e) {
+				// TODO Auto-generated catch block
+				
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("status", e.getCode());
+				jsonObject.put("msg", e.getMessage());
+				response.setContentType("text/html;charset=UTF-8");
+				response.getWriter().write(jsonObject.toString());
+			}
+		return result;
 	}
 	@RequestMapping(value="{id}/apis",method=RequestMethod.GET)
 	@ResponseBody
@@ -48,24 +79,100 @@ public class UApiInteface {
 //	a)	[post] /apis		创建新的接口
 	@RequestMapping(value="" ,method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult apiinteface_add(String appId, String apiPath, Long requestMethod, String header,
-			String description, String parameter, String apistatus, String auditstatus) {
-			XoadoResult result = apiInteface.apiinteface_add(appId, apiPath, requestMethod, header, description, parameter);
-			return result;
+	public XoadoResult apiinteface_add(String appId, String apiPath, Long requestMethod, String header,String description, String parameter, String apistatus, String auditstatus,HttpServletResponse response) throws IOException {
+//		Map<Object,Object> map = new HashMap<>();
+//		map.put("appId", appId);
+//		map.put("apiPath", apiPath);
+//		map.put("requestMethod", requestMethod);
+//		map.put("header", header);
+//		map.put("description", description);
+//		map.put("parameter", parameter);
+//		map.put("apistatus", apistatus);
+//		map.put("auditstatus", auditstatus);
+//		Map<Object, Object> mustMap = new HashMap<>();
+//		mustMap.put("appId", "appId");
+//		mustMap.put("apiPath", "apiPath");
+//		mustMap.put("requestMethod", "requestMethod");
+//		mustMap.put("header", "header");
+//		mustMap.put("description", "description");
+//		mustMap.put("parameter", "parameter");
+//		mustMap.put("apistatus", "apistatus");
+//		mustMap.put("auditstatus","auditstatus");
+//		ApiIntefaceAdd apiIntefaceAdd = new ApiIntefaceAdd();
+//		ParamCheack paramCheack = new ParamCheack();
+//		apiIntefaceAdd =(ApiIntefaceAdd) paramCheack.membercheack(map, apiIntefaceAdd, mustMap);
+		XoadoResult result=null;
+		try {
+			result = apiInteface.apiinteface_add(appId,apiPath,requestMethod,header,description,parameter,apistatus,auditstatus,response);
+		} catch (XoadoException e) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("status", e.getCode());
+			jsonObject.put("msg", e.getMessage());
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter().write(jsonObject.toString());
+		}
+		return result;
 	}
 //	修改指定的接口信息
 	@RequestMapping(value="/{id}",method=RequestMethod.PUT)
 	@ResponseBody
-	public XoadoResult apiid_update(@PathVariable("id") String apiId, String apiPath, Long requestMethod, String header, String description,
-			String parameter){
-		XoadoResult result = apiInteface.apiid_update(apiId, apiPath, requestMethod, header, description, parameter);
+	public XoadoResult apiid_update(@PathVariable("id") String apiId, String apiPath, Long requestMethod, String header, String description,String parameter,HttpServletResponse response) throws IOException{
+//		Map<Object,Object> map = new HashMap<>();
+//		map.put("apiPath", apiPath);
+//		map.put("requestMethod", requestMethod);
+//		map.put("header", header);
+//		map.put("description", description);
+//		map.put("parameter", parameter);
+//		Map<Object, Object> mustMap = new HashMap<>();
+//		mustMap.put("apiPath", "apiPath");
+//		mustMap.put("requestMethod", "requestMethod");
+//		mustMap.put("header", "header");
+//		mustMap.put("description", "description");
+//		mustMap.put("parameter", "parameter");
+//		ApiIdUpdate apiIdUpdate = new ApiIdUpdate();
+//		ParamCheack paramCheack = new ParamCheack();
+//		apiIdUpdate =(ApiIdUpdate) paramCheack.membercheack(map, apiIdUpdate, mustMap);
+		XoadoResult result=null;
+		try {
+			result = apiInteface.apiid_update(apiId, apiPath,requestMethod,header,description,parameter,response);
+		} catch (XoadoException e) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("status", e.getCode());
+			jsonObject.put("msg", e.getMessage());
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter().write(jsonObject.toString());
+		}
 		return result;	
 	}
 	@RequestMapping(value="/upid",method=RequestMethod.PUT)
 	@ResponseBody
 	public XoadoResult apiidupdate(@RequestParam("apiId") String apiId, String apiPath, Long requestMethod, String header, String description,
-			String parameter){
-		XoadoResult result = apiInteface.apiid_update(apiId, apiPath, requestMethod, header, description, parameter);
+			String parameter,HttpServletResponse response) throws IOException{
+//		Map<Object,Object> map = new HashMap<>();
+//		map.put("apiPath", apiPath);
+//		map.put("requestMethod", requestMethod);
+//		map.put("header", header);
+//		map.put("description", description);
+//		map.put("parameter", parameter);
+//		Map<Object, Object> mustMap = new HashMap<>();
+//		mustMap.put("apiPath", "apiPath");
+//		mustMap.put("requestMethod", "requestMethod");
+//		mustMap.put("header", "header");
+//		mustMap.put("description", "description");
+//		mustMap.put("parameter", "parameter");
+//		ApiIdUpdate apiIdUpdate = new ApiIdUpdate();
+//		ParamCheack paramCheack = new ParamCheack();
+//		apiIdUpdate =(ApiIdUpdate) paramCheack.membercheack(map, apiIdUpdate, mustMap);
+		XoadoResult result=null;
+		try {
+			result = apiInteface.apiid_update(apiId, apiPath,requestMethod,header,description,parameter,response);
+		} catch (XoadoException e) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("status", e.getCode());
+			jsonObject.put("msg", e.getMessage());
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter().write(jsonObject.toString());
+		}
 		return result;
 	}
 //	d)	[put] /apis /{id}/states			修改指定的接口状态

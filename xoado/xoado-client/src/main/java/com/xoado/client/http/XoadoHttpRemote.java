@@ -1,5 +1,7 @@
 package com.xoado.client.http;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,7 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -19,15 +24,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.springframework.http.HttpRequest;
 
 import com.alibaba.fastjson.JSON;
 
 import com.xoado.protocol.XoadoConstant;
-
-
-
-
 
 public class XoadoHttpRemote {
 	
@@ -40,6 +43,7 @@ public class XoadoHttpRemote {
 //	public HttpClients clients;
 	
 	private HttpUriRequest request;
+	private HttpPost httpPost;
 	
 	public HttpUriRequest getRequest() {
 		return request;
@@ -48,16 +52,21 @@ public class XoadoHttpRemote {
 	public void setRequest(HttpUriRequest request) {
 		this.request = request;
 	}
-
+	public void setpost(HttpPost httpPost){
+		this.httpPost=httpPost;
+	}
+	/**
+	 * 将传递的提交方式转换
+	 * @param method
+	 * @param url
+	 */
 	public XoadoHttpRemote (String method,String url){
-		
-//		 CloseableHttpClient httpClient = HttpClients.createDefault();
 		
 		try {
 			
 			if(method =="post"){
 				
-				request = new HttpPost(url);
+				httpPost = new HttpPost(url);
 
 				
 			}else if(method == "get"){
@@ -74,22 +83,32 @@ public class XoadoHttpRemote {
 		} catch (Exception e) {
 		
 		}
-		
-	
 	}
-	
+	/**
+	 * 将缓存的 code放入header
+	 * @param request
+	 * @param response
+	 * @param code
+	 */
 	public  void setHeader(HttpServletRequest request,HttpServletResponse response,String code){
-
-		
 		response.setHeader(XoadoConstant.LOCALAPPCODE, code);
-		
-
 	}
-
+	/**
+	 * 将缓存的 code放入header
+	 * @param request
+	 * @param response
+	 * @param code
+	 */
+	public  void setAppHeader(HttpServletRequest request,HttpServletResponse response,String code){
+		response.setHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, code);
+	}
+	
+	/**
+	 * 当参数为空的时候调用
+	 * @return
+	 */
 	public String send(){
-		
 		String token = ""; 
-		
 		 CloseableHttpClient httpClient = HttpClients.createDefault();
 		
 		try {
@@ -103,6 +122,43 @@ public class XoadoHttpRemote {
 	
 				token = EntityUtils.toString(entity, "UTF-8");
 				
+				System.out.println("打印："+token);
+				response.close();
+				
+				return token;
+			}
+			
+		} catch (Exception e) {
+			return token;
+		}
+		
+		return token;
+		
+	}
+	/**
+	 * 当参数不为空的时候调用此方法
+	 * @param XOADOTOKENID   POST
+	 * @param Organizeid
+	 * @return
+	 */
+	public String send(List<BasicNameValuePair> list){
+		String token = ""; 
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		try {
+			//对HttpEntity将参数转换成UTF-8
+			UrlEncodedFormEntity urlEntity=new UrlEncodedFormEntity(list,"utf-8");
+			//将body体放入域
+			httpPost.setEntity(urlEntity);
+			//发送请求，并接受参数
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			//获取响应中的body内容
+			HttpEntity entity = response.getEntity();
+			
+			if(entity!=null){
+	
+				token = EntityUtils.toString(entity, "UTF-8");
+				
+				System.out.println("打印："+token);
 				response.close();
 				
 				return token;
@@ -141,15 +197,12 @@ public class XoadoHttpRemote {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		 
 		return null;
-		
 	}
 	
 	
 	/**
-	 * httpclient  发送post请求，问题：使用类的上一个方法  发回来的数据为乱码，这个方法解决乱码问题，  
-	 * 应该封装http发送方法，解决各个问题
+	 * httpclient  发送post请求，
 	 * 
 	 */
 	private static RequestConfig requestConfig; 

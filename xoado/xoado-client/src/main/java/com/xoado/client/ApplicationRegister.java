@@ -41,30 +41,25 @@ public class ApplicationRegister implements ServletContextListener{
 			XoadoCache cache = new XoadoCache();
 			context.setAttribute(XoadoConstant.XOADOCACHE, cache);
 //		生成code
-			String code = MD5.MD5Encode(UUID.randomUUID().toString());
+			String code = null;
 //		存全局code
-			context.setAttribute(XoadoConstant.XOADOCACHE, code);
+			//context.setAttribute(XoadoConstant.XOADOCACHE, code);
 //		发送	到中转站
 			String string = ApplicationRequest.headerbeat(code,appid);
+			context.setAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN, string);
+			System.out.println(string);
 			String isstring = "true";
-			boolean b = string.equals(isstring);
-			if(b==false){
+			//boolean b = string.equals(isstring);
+			if(string==null){
 				ApplicationRequest.headerbeat(code,appid);
 			}
 //		启动定时器
-			Timer clock = new Timer(1000*60*5, new ActionListener() {
+			Timer clock = new Timer(1000*60*60*2, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					
-					XoadoCache cache = new XoadoCache();
-					context.setAttribute(XoadoConstant.XOADOCACHE, cache);
-					
-					String code = MD5.MD5Encode(UUID.randomUUID().toString());
-					
-					context.setAttribute(XoadoConstant.XOADOCACHE, code);
-					
-					ApplicationRequest.headerbeat(code,appid);
-
+					String code=context.getAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN).toString();
+					String newCode=ApplicationRequest.headerbeat(code,appid);
+					context.setAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN, newCode);
 				}
 			});
 			clock.start();

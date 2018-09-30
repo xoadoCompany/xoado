@@ -28,7 +28,38 @@
 	</listener>
 
 <!-- 过滤器配置 -->
- 
+
+	<filter>
+		<filter-name>ApplicationFilter</filter-name>
+		<filter-class>com.xoado.client.ApplicationFilter</filter-class>
+		<init-param>
+			<param-name>excludedPages</param-name>
+			<param-value>/index.jsp</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+	<!-- 一下是需要过滤的接口，如果不需要过滤注释掉即可 -->
+	<filter-name>ApplicationFilter</filter-name>
+		<url-pattern>/organizations/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>ApplicationFilter</filter-name>
+		<url-pattern>/apis/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>ApplicationFilter</filter-name>
+		<url-pattern>/applications/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>ApplicationFilter</filter-name>
+		<url-pattern>/Permissions/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>ApplicationFilter</filter-name>
+		<url-pattern>/users/*</url-pattern>
+	</filter-mapping>
+
 	<filter>
 		<filter-name>XoadoFilter</filter-name>
 		<filter-class>com.xoado.client.XoadoFilter</filter-class>
@@ -40,7 +71,7 @@
 	
 	<filter-mapping>
 	<!-- 一下是需要过滤的接口，如果不需要过滤注释掉即可 -->
-		<filter-name>XoadoFilter</filter-name>
+	<filter-name>XoadoFilter</filter-name>
 		<url-pattern>/organizations/*</url-pattern>
 	</filter-mapping>
 	<filter-mapping>

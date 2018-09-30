@@ -20,6 +20,7 @@ import com.xoado.authcenter.bean.RefreshCode;
 import com.xoado.authcenter.service.Iuser.IApplication;
 import com.xoado.common.ParamCheack;
 import com.xoado.common.XoadoResult;
+import com.xoado.protocol.AccessIdApplication;
 import com.xoado.protocol.XoadoException;
 
 import net.sf.json.JSONObject;
@@ -40,9 +41,9 @@ public class Application {
 	 * @return
 	 * @throws IOException 
 	 */
-	@RequestMapping(value="/register",method=RequestMethod.POST)
+	@RequestMapping(value="/register",method=RequestMethod.GET)
 	@ResponseBody
-	public XoadoResult applicationInitialize(String appId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public String applicationInitialize(String appId, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Map<Object,Object> map = new HashMap<>();
 		map.put("appId", appId);
 		Map<Object,Object> mustMap = new HashMap<>();
@@ -50,7 +51,7 @@ public class Application {
 		ApplicationInitialize initialize = new ApplicationInitialize();
 		ParamCheack paramCheack = new ParamCheack();
 		initialize =(ApplicationInitialize) paramCheack.membercheack(map, initialize, mustMap);
-		XoadoResult result=null;
+		String result=null;
 		try {
 			result = Iapplication.applicationInitialize(initialize, request, response);
 		} catch (XoadoException e) {
@@ -75,15 +76,18 @@ public class Application {
 	 */
 	@RequestMapping(value="/refresh",method=RequestMethod.GET)
 	@ResponseBody
-	public XoadoResult refreshCode(String appId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public String refreshCode(String appId,String code, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Map<Object,Object> map = new HashMap<>();
 		map.put("appId", appId);
+		map.put("code", code);
 		Map<Object,Object> mustMap = new HashMap<>();
 		mustMap.put("appId", "appId");
+		mustMap.put("code", "code");
 		RefreshCode refreshCode = new RefreshCode();
 		ParamCheack paramCheack = new ParamCheack();
+//		refreshCode.setappId(appId);
 		refreshCode = (RefreshCode)paramCheack.membercheack(map, refreshCode, mustMap);
-		XoadoResult result=null;
+		String result=null;
 		try {
 			result = Iapplication.refreshCode(refreshCode, request, response);
 		} catch (XoadoException e) {
@@ -107,7 +111,7 @@ public class Application {
 	 */
 	@RequestMapping(value="/verify",method=RequestMethod.POST)
 	@ResponseBody
-	public XoadoResult accessVerify(String code, HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public AccessIdApplication accessVerify(String code, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Map<Object,Object> map = new HashMap<>();
 		map.put("code", code);
 		Map<Object,Object> mustMap = new HashMap<>();
@@ -115,9 +119,9 @@ public class Application {
 		AccessVerify accessVerify = new AccessVerify();
 		ParamCheack paramCheack = new ParamCheack();
 		accessVerify =(AccessVerify) paramCheack.membercheack(map, accessVerify, mustMap);
-		XoadoResult result=null;
+		AccessIdApplication applicationIdentity=null;
 		try {
-			result = Iapplication.accessVerify(accessVerify, request, response);
+			applicationIdentity = Iapplication.accessVerify(accessVerify, request, response);
 		} catch (XoadoException e) {
 			// TODO Auto-generated catch block
 			JSONObject jsonObject = new JSONObject();
@@ -127,7 +131,7 @@ public class Application {
 			response.setContentType("text/html;charset=UTF-8");
 			response.getWriter().write(jsonObject.toString());
 		}
-		return result;
+		return applicationIdentity;
 		
 	}
 }

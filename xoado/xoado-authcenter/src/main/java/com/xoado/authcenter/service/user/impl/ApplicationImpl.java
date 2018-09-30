@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,8 +21,10 @@ import com.xoado.authcenter.mapper.TblAppInformationMapper;
 import com.xoado.common.JsonUtils;
 import com.xoado.common.MD5;
 import com.xoado.common.XoadoResult;
-import com.xoado.protocol.ApplicationIdentity;
+import com.xoado.protocol.AccessIdApplication;
+import com.xoado.protocol.ApplicationStatus;
 import com.xoado.protocol.BaseRetCode;
+import com.xoado.protocol.XoadoConstant;
 import com.xoado.protocol.XoadoException;
 
 import net.sf.json.JSONObject;
@@ -36,8 +39,10 @@ public class ApplicationImpl implements com.xoado.authcenter.service.Iuser.IAppl
 	private RedisCache redisCache;
 	
 	@Override
-	public XoadoResult applicationInitialize(ApplicationInitialize initialize, HttpServletRequest request, HttpServletResponse response) throws  XoadoException {
+	public String applicationInitialize(ApplicationInitialize initialize, HttpServletRequest request, HttpServletResponse response) throws  XoadoException {
 		// TODO Auto-generated method stub
+		String codeValue=MD5.MD5Encode(UUID.randomUUID().toString());
+		response.setHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, codeValue);
 		if(initialize==null){
 			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
@@ -45,22 +50,21 @@ public class ApplicationImpl implements com.xoado.authcenter.service.Iuser.IAppl
 		if(key==null){
 			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_NOT_FOUND_RESOURCE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_NOT_FOUND_RESOURCE.getRetMsg());
 		}
-			List<ApplicationIdentity> applicationList = new ArrayList<ApplicationIdentity>();
-			ApplicationIdentity applicationIdentity = new ApplicationIdentity();
+			List<AccessIdApplication> applicationList = new ArrayList<AccessIdApplication>();
+			AccessIdApplication applicationIdentity = new AccessIdApplication();
 			applicationIdentity.setappId(initialize.getappId());
-			applicationIdentity.setcode(MD5.MD5Encode(UUID.randomUUID().toString()));
-			applicationIdentity.setvalue("whiteList");
+			applicationIdentity.setcode(codeValue);
+			applicationIdentity.setvalue(ApplicationStatus.WHITELIST.getStauts());
 			applicationList.add(applicationIdentity);
 			String json = JsonUtils.objectToJson(applicationList);
-//			System.out.println("-------------"+json.toString());
-			request.getSession().setAttribute("XOADOAPPACCESSCODE", applicationIdentity.getcode());    //存入header
+			request.getSession().setAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN, applicationIdentity.getcode());   
 			redisCache.set(applicationIdentity.getcode(), json);
 			
-			return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg(),applicationIdentity.getcode());
+			return applicationIdentity.getcode();
 	}
 
 	@Override
-	public XoadoResult refreshCode(RefreshCode reshCode, HttpServletRequest request, HttpServletResponse response) throws XoadoException {
+	public String refreshCode(RefreshCode reshCode, HttpServletRequest request, HttpServletResponse response) throws XoadoException {
 		// TODO Auto-generated method stub
 		if(reshCode==null){
 			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
@@ -69,30 +73,30 @@ public class ApplicationImpl implements com.xoado.authcenter.service.Iuser.IAppl
 		if(key==null){
 			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_NOT_FOUND_RESOURCE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_NOT_FOUND_RESOURCE.getRetMsg());
 		}
-		
-		String code = (String) request.getSession().getAttribute("XOADOAPPACCESSCODE");
-		if(code==null){
+//		String code = (String) request.getSession().getAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN);
+		if(reshCode.getcode()==null){
 			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_FRAME_APP_UNREGISTER.getRetCode()), BaseRetCode.CODE_FRAME_APP_UNREGISTER.getRetMsg());
 		}
-//		System.out.println("--------"+code);
-		String string = redisCache.get(code);
-		ApplicationIdentity applicationIdentity = new ApplicationIdentity();
+		String string = redisCache.get(reshCode.getcode());
+		System.out.println(string+"88888888888888");
+		AccessIdApplication applicationIdentity = new AccessIdApplication();
 		net.sf.json.JSONArray array = net.sf.json.JSONArray.fromObject(string);
 		for(int i=0;i<array.size();i++){
 			JSONObject object = JSONObject.fromObject(array.get(i));
 			if(object.get("appId").equals(reshCode.getappId())){
-				List<ApplicationIdentity> applicationList = new ArrayList<ApplicationIdentity>();
+				List<AccessIdApplication> applicationList = new ArrayList<AccessIdApplication>();
 				applicationIdentity.setappId(object.get("appId").toString());
 				applicationIdentity.setcode(MD5.MD5Encode(UUID.randomUUID().toString()));
 				applicationIdentity.setvalue(object.get("value").toString());
 				applicationList.add(applicationIdentity);
 				String json = JsonUtils.objectToJson(applicationList);
-				request.getSession().setAttribute("XOADOAPPACCESSCODE", applicationIdentity.getcode());    //存入header
+				response.setHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, applicationIdentity.getcode());   //存入header
+				request.getSession().setAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN, applicationIdentity.getcode());    
 				redisCache.set(applicationIdentity.getcode(), json);
-				redisCache.del(code);
+				redisCache.del(reshCode.getcode());
 			}
 		}
-		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg(),applicationIdentity.getcode());
+		return applicationIdentity.getcode();
 	}
 	
 	/**
@@ -101,25 +105,33 @@ public class ApplicationImpl implements com.xoado.authcenter.service.Iuser.IAppl
 	 * @throws  
 	 */
 	@Override
-	public XoadoResult accessVerify(AccessVerify accessVerify, HttpServletRequest request, HttpServletResponse response) throws XoadoException {
+	public AccessIdApplication accessVerify(AccessVerify accessVerify, HttpServletRequest request, HttpServletResponse response) throws XoadoException {
 		// TODO Auto-generated method stub
+		AccessIdApplication applicationIdentity = new AccessIdApplication();
 		if(accessVerify==null){
 			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
 		String string = redisCache.get(accessVerify.getcode());
 		if(string==null){
-			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_ERROR_BREAK_THE_LAW.getRetCode()), BaseRetCode.CODE_ERROR_BREAK_THE_LAW.getRetMsg(),"未知应用");
+			applicationIdentity.setcode(accessVerify.getcode());
+			applicationIdentity.setvalue(ApplicationStatus.NOTEXIST.getStauts());
+			applicationIdentity.setappId("");
+			return applicationIdentity;
 		}
 		net.sf.json.JSONArray array = net.sf.json.JSONArray.fromObject(string);
 		JSONObject object=null;
 		for(int i=0;i<array.size();i++){
 			object = JSONObject.fromObject(array.get(i));
 			Object status = object.get("value");
-			if(!status.equals("whiteList")){
+			applicationIdentity.setappId(object.get("appId").toString());
+			applicationIdentity.setcode(object.get("code").toString());
+			applicationIdentity.setvalue(status.toString());
+			if(!status.equals(ApplicationStatus.WHITELIST.getStauts())){
 				throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_ERROR_BREAK_THE_LAW.getRetCode()), BaseRetCode.CODE_ERROR_BREAK_THE_LAW.getRetMsg(),object);
 			}
+			
 		}
-		return XoadoResult.build(Integer.parseInt(BaseRetCode.CODE_SUCCESS.getRetCode()), BaseRetCode.CODE_SUCCESS.getRetMsg(),object);
+		return applicationIdentity;
 	}
 
 }

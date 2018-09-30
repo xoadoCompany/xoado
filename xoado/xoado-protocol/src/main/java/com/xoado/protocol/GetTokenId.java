@@ -42,4 +42,48 @@ public class GetTokenId {
 			return XOADOTOKENID;
 	}
 	
+	/**
+	 * 从header中获取XOADOAPPACCESSCODE
+	 * 
+	 * @param request
+	 * @return
+	 */
+	/*public static String getAppAccessHeader(HttpServletRequest request) {
+		//从header中获取XOADOAPPACCESSCODE
+		String XOADOAPPACCESSCODE = request.getHeader("XOADOAPPACCESSCODE");
+		//为空则去cookie中找
+		if (XOADOAPPACCESSCODE == null) {
+			Cookie[] cookies = request.getCookies();
+			Map<String, Object> map = new HashMap<>();
+			if (cookies != null) {
+				for (Cookie cookie : cookies) {
+					map.put(cookie.getName(), cookie.getValue());
+				}
+				XOADOAPPACCESSCODE = (String) map.get("XOADOAPPACCESSCODE");
+				if (XOADOAPPACCESSCODE == null) {
+					return null;
+				}
+			}
+		
+			
+			  }
+		return XOADOAPPACCESSCODE;
+	}*/
+	
+	/**
+	 * 从header中获取
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getPermissionAccessHeader(HttpServletRequest request) {
+		//从header中获取XOADOAPPACCESSCODE
+		String XOADOPERMISSION = request.getHeader("XOADOPERMISSION");
+		if (XOADOPERMISSION == null) {
+			return null;
+			}
+
+		return XOADOPERMISSION;
+	}
+	
 }

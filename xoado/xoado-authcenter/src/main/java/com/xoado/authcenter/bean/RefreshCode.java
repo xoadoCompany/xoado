@@ -2,6 +2,7 @@ package com.xoado.authcenter.bean;
 
 public class RefreshCode {
 	private String appId;
+	private String code;
 
 	/**
 	 * @return the appId
@@ -15,6 +16,14 @@ public class RefreshCode {
 	 */
 	public void setappId(String appId) {
 		this.appId = appId;
+	}
+
+	public String getcode() {
+		return code;
+	}
+
+	public void setcode(String code) {
+		this.code = code;
 	}
 	
 }
