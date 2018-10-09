@@ -11,6 +11,8 @@ import javax.servlet.ServletContextListener;
 
 import javax.swing.Timer;
 
+import org.apache.http.client.methods.HttpHead;
+
 import com.xoado.client.http.ApplicationRequest;
 import com.xoado.common.MD5;
 import com.xoado.protocol.XoadoConstant;
@@ -44,22 +46,26 @@ public class ApplicationRegister implements ServletContextListener{
 			String code = null;
 //		存全局code
 			//context.setAttribute(XoadoConstant.XOADOCACHE, code);
+			
 //		发送	到中转站
 			String string = ApplicationRequest.headerbeat(code,appid);
+//			HttpHead httpHead = new HttpHead();
+//			httpHead.addHeader(XoadoConstant.XOADOAUTHCETERDOMAIN,code);
 			context.setAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN, string);
-			System.out.println(string);
+			System.out.println("code------"+string);
 			String isstring = "true";
 			//boolean b = string.equals(isstring);
 			if(string==null){
 				ApplicationRequest.headerbeat(code,appid);
 			}
 //		启动定时器
-			Timer clock = new Timer(1000*60*60*2, new ActionListener() {
+			Timer clock = new Timer(1000*60*5, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					String code=context.getAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN).toString();
 					String newCode=ApplicationRequest.headerbeat(code,appid);
 					context.setAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN, newCode);
+//					httpHead.addHeader(XoadoConstant.XOADOAUTHCETERDOMAIN,newCode);
 				}
 			});
 			clock.start();

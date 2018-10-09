@@ -1,6 +1,7 @@
 package com.xoado.authcenter.controller.users;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import com.xoado.authcenter.service.Iuser.IApplication;
 import com.xoado.common.ParamCheack;
 import com.xoado.common.XoadoResult;
 import com.xoado.protocol.AccessIdApplication;
+import com.xoado.protocol.XoadoConstant;
 import com.xoado.protocol.XoadoException;
 
 import net.sf.json.JSONObject;
@@ -54,6 +56,9 @@ public class Application {
 		String result=null;
 		try {
 			result = Iapplication.applicationInitialize(initialize, request, response);
+//			System.out.println("---header:----"+request.getHeader(XoadoConstant.XOADOAUTHCETERDOMAIN));
+			Enumeration headerNames = request.getHeaderNames();
+	 		System.out.println("---headerNames-----"+headerNames);
 		} catch (XoadoException e) {
 			// TODO Auto-generated catch block
 			JSONObject jsonObject = new JSONObject();
@@ -90,6 +95,8 @@ public class Application {
 		String result=null;
 		try {
 			result = Iapplication.refreshCode(refreshCode, request, response);
+			
+			
 		} catch (XoadoException e) {
 			// TODO Auto-generated catch block
 			JSONObject jsonObject = new JSONObject();

@@ -3,6 +3,9 @@ package com.xoado.client;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.Header;
+import org.apache.http.client.methods.HttpHead;
+
 import com.xoado.protocol.AccessIdApplication;
 import com.xoado.protocol.ApplicationStatus;
 import com.xoado.protocol.BaseRetCode;
@@ -26,10 +29,14 @@ public class ApplicationVerify {
 		AccessIdApplication accessidapplication = (AccessIdApplication) request.getSession().getAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN);
 		if (accessidapplication == null) {
 			// 当前session无将从header中获取XOADOAPPACCESSCODE
+//			HttpHead httpHead = new HttpHead();
+//			Header[] headers = httpHead.getHeaders(XoadoConstant.XOADOAUTHCETERDOMAIN);
+//	 		String code = headers[0].getValue();
+//	 		System.out.println(code);
 			String code = request.getHeader(XoadoConstant.XOADOAUTHCETERDOMAIN);
 			if (code == null) {
+				System.out.println("-----参数不匹配-----"+code);
 				throw new com.xoado.protocol.XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()), BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
-
 				//throw new NullPointerException("Header中没有Code的信息");// header没有code
 			}
 			// code 不为空则去缓存查询该code信息

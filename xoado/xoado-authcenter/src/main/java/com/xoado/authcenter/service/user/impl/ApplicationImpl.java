@@ -1,6 +1,7 @@
 package com.xoado.authcenter.service.user.impl;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,6 +9,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.Header;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +46,12 @@ public class ApplicationImpl implements com.xoado.authcenter.service.Iuser.IAppl
 	public String applicationInitialize(ApplicationInitialize initialize, HttpServletRequest request, HttpServletResponse response) throws  XoadoException {
 		// TODO Auto-generated method stub
 		String codeValue=MD5.MD5Encode(UUID.randomUUID().toString());
-		response.setHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, codeValue);
+// 		response.setHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, codeValue);
+ 		response.addHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, codeValue);
+// 		System.out.println(request.getSession().getAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN));
+// 		HttpGet httpGet = new HttpGet();
+// 		HttpHead httpHead = new HttpHead();
+// 		httpHead.addHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, codeValue);
 		if(initialize==null){
 			throw new XoadoException(Integer.parseInt(BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetCode()),BaseRetCode.CODE_PROFESSIONAL_WORK_PARAMETER_NOT_LIKE.getRetMsg());
 		}
@@ -90,7 +99,9 @@ public class ApplicationImpl implements com.xoado.authcenter.service.Iuser.IAppl
 				applicationIdentity.setvalue(object.get("value").toString());
 				applicationList.add(applicationIdentity);
 				String json = JsonUtils.objectToJson(applicationList);
-				response.setHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, applicationIdentity.getcode());   //存入header
+				response.addHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, applicationIdentity.getcode());   //存入header
+//				HttpHead httpHead = new HttpHead();
+//				httpHead.addHeader(XoadoConstant.XOADOAUTHCETERDOMAIN, applicationIdentity.getcode());
 				request.getSession().setAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN, applicationIdentity.getcode());    
 				redisCache.set(applicationIdentity.getcode(), json);
 				redisCache.del(reshCode.getcode());

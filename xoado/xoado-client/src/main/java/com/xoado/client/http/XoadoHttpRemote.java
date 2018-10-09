@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -114,9 +116,16 @@ public class XoadoHttpRemote {
 		try {
 			
 			CloseableHttpResponse response = httpClient.execute(request);
+			Header[] headers = response.getHeaders(XoadoConstant.XOADOAUTHCETERDOMAIN);
+//			String[] split = headers[0].toString().split(":");
+//			HttpHead httpHead = new HttpHead();
+//			httpHead.addHeader(XoadoConstant.XOADOAUTHCETERDOMAIN,split[1]);
+//			Header[] headers2 = httpHead.getHeaders(XoadoConstant.XOADOAUTHCETERDOMAIN);
+//			System.out.println(headers2[0].getValue());
 			
 			
 			HttpEntity entity = response.getEntity();
+			
 			
 			if(entity!=null){
 	

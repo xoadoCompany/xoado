@@ -28,9 +28,10 @@ public class ApplicationRequest {
 	public static AccessIdentity gettoken(HttpServletRequest request, HttpServletResponse response, String XOADOTOKENID,
 			String Organizeid) {
 		if (XOADOTOKENID != null) {
-			// 去认证中心 post http://localhost:8080
+			// 去认证中心 post http://localhost:8085
 			String token = null;
-			host = PropertiesGetFile.getMap().get("XOADOAUTHCETERDOMAIN");
+//			host = PropertiesGetFile.getMap().get("XOADOAUTHCETERDOMAIN");
+			host="http://192.168.1.60:8085";
 			String url = host + "/usercode/gettoken";
 			xhr = new XoadoHttpRemote("post", url);
 			// 获取app之间存的code
@@ -66,8 +67,8 @@ public class ApplicationRequest {
 	 * @return
 	 */
 	public static String headerbeat(String code, String appid) {
-		host = PropertiesGetFile.getMap().get("XOADOAUTHCETERDOMAIN");
-//		host="http://192.168.1.122:8085";
+//		host = PropertiesGetFile.getMap().get("XOADOAUTHCETERDOMAIN");
+		host="http://192.168.1.60:8085";
 		if (code != null) {
 			String url = host + "/application/refresh?code=" + code + "&appId=" + appid;
 			xhr = new XoadoHttpRemote("get", url);
@@ -99,8 +100,8 @@ public class ApplicationRequest {
 		AccessIdApplication accessidapplication = new AccessIdApplication();
 		if (code != null) {
 			// 获取认证中心的地址
-			host = PropertiesGetFile.getMap().get("XOADOAUTHCETERDOMAIN");
-//			host="http://192.168.1.122:8085";
+//			host = PropertiesGetFile.getMap().get("XOADOAUTHCETERDOMAIN");
+			host="http://192.168.1.60:8085";
 			// 带参拼接
 			String url = host + "/application/verify";
 			xhr = new XoadoHttpRemote("post", url);
