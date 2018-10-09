@@ -59,7 +59,7 @@ public class ApplicationRegister implements ServletContextListener{
 				ApplicationRequest.headerbeat(code,appid);
 			}
 //		启动定时器
-			Timer clock = new Timer(1000*60*5, new ActionListener() {
+			Timer clock = new Timer(1000*60*60*2, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					String code=context.getAttribute(XoadoConstant.XOADOAUTHCETERDOMAIN).toString();
